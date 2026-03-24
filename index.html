@@ -1,0 +1,293 @@
+﻿<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Айро Хоккей | Рейтинг +200 ЭЛО</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&family=Russo+One&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-noise" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="logo">
+        <span class="logo-mark">Айро Хоккей</span>
+        <span class="logo-sub">за выигрыш +200 ЭЛО</span>
+      </div>
+      <div class="top-actions">
+        <button class="btn-outline" id="openRegistrationTop">Регистрация</button>
+        <button class="profile-btn" id="profileBtn">Профиль</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="auth flow-section is-active" id="register">
+        <div class="section-head">
+          <h2>Регистрация</h2>
+          <p>Создай профиль, чтобы участвовать в рейтинге.</p>
+        </div>
+        <div class="auth-grid single">
+          <form class="auth-card" id="registerForm" novalidate>
+            <label class="field">
+              <span>Ник</span>
+              <input type="text" id="regNickname" placeholder="StormPlayer" />
+            </label>
+            <label class="field">
+              <span>Email</span>
+              <input type="email" id="regEmail" placeholder="you@mail.com" />
+            </label>
+            <label class="field">
+              <span>Пароль</span>
+              <input type="password" id="regPassword" placeholder="••••••" />
+            </label>
+            <div class="code-box hidden" id="codeBox">
+              <label class="field">
+                <span>Код из письма</span>
+                <input type="text" id="regCode" placeholder="123456" inputmode="numeric" />
+              </label>
+              <button type="button" class="btn-outline" id="confirmCode">Подтвердить код</button>
+            </div>
+            <button type="submit" class="btn-primary">Создать профиль</button>
+            <div class="field-hint" id="registerStatus">Код регистрации будет показан на экране (демо).</div>
+            <div class="flow-hint">Шаг 1 из 3. После подтверждения откроется вход.</div>
+          </form>
+        </div>
+      </section>
+
+      <section class="auth flow-section" id="login">
+        <div class="section-head">
+          <h2>Вход</h2>
+          <p>Войди по нику и паролю, которые ты зарегистрировал.</p>
+        </div>
+        <div class="auth-grid single">
+          <form class="auth-card" id="loginForm" novalidate>
+            <label class="field">
+              <span>Ник</span>
+              <input type="text" id="loginNickname" placeholder="StormPlayer" />
+            </label>
+            <label class="field">
+              <span>Пароль</span>
+              <input type="password" id="loginPassword" placeholder="••••••" />
+            </label>
+            <button type="submit" class="btn-primary">Войти</button>
+            <div class="field-hint" id="loginStatus">Данные хранятся в браузере.</div>
+            <div class="flow-hint">Шаг 2 из 3. После входа откроется игра.</div>
+          </form>
+        </div>
+      </section>
+
+      <section class="hero flow-section" id="home">
+        <div class="hero-card">
+          <div class="hero-top">
+            <div class="hero-badge">3D | Чёрно-белая арена</div>
+            <div class="hero-status" id="heroStatus">Сейчас в онлайне: 124</div>
+          </div>
+          <h1>Айро Хоккей. Жёсткие дуэли, чистая геометрия, рейтинг за победу.</h1>
+          <p>
+            Принцип прост: поле, два ворот, две фишки и шайба по центру. Твоя фишка слева, противник справа.
+            Линию середины пересекать нельзя. После гола шайба появляется на стороне соперника у центральной линии.
+          </p>
+          <div class="hero-actions center">
+            <button class="btn-primary" id="playNow">Играть сейчас</button>
+            <button class="btn-outline" id="openArena">К арене</button>
+          </div>
+          <div class="mode-center">
+            <div class="mode-title-center">Выбор режима</div>
+            <div class="mode-grid mode-center-grid">
+              <button class="mode-card is-active" data-mode="bot">
+                <span class="mode-title">Бот</span>
+                <span class="mode-desc">Разные уровни сложности</span>
+              </button>
+              <button class="mode-card" data-mode="online">
+                <span class="mode-title">Онлайн</span>
+                <span class="mode-desc">Подбор соперника</span>
+              </button>
+              <button class="mode-card" data-mode="duel">
+                <span class="mode-title">Дуэль</span>
+                <span class="mode-desc">Приглашение по нику</span>
+              </button>
+            </div>
+          </div>
+          <div class="hero-metrics">
+            <div class="metric">
+              <span class="metric-value" id="metricElo">0</span>
+              <span class="metric-label">текущее ЭЛО</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value" id="metricGames">0</span>
+              <span class="metric-label">игр сыграно</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">+200</span>
+              <span class="metric-label">за победу</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="arena flow-section" id="arena">
+        <div class="section-head">
+          <h2>Игровая арена</h2>
+          <p>Выбери режим: бот, онлайн или дуэль. В дуэли укажи ник соперника. В онлайне включается подбор.</p>
+        </div>
+
+        <div class="arena-layout">
+          <div class="panel panel-left">
+            <div class="panel-block" id="botOptions">
+              <h3>Настройка бота</h3>
+              <label class="field">
+                <span>Сложность</span>
+                <select id="botDifficulty">
+                  <option value="easy">Лёгкий</option>
+                  <option value="normal" selected>Нормальный</option>
+                  <option value="hard">Жёсткий</option>
+                </select>
+              </label>
+              <div class="field-hint">Бот держится на своей половине и реагирует на шайбу.</div>
+            </div>
+
+            <div class="panel-block hidden" id="onlineOptions">
+              <h3>Подбор</h3>
+              <button class="btn-primary" id="queueToggle">Встать в очередь</button>
+              <div class="queue-status" id="queueStatus">Очередь выключена</div>
+            </div>
+
+            <div class="panel-block hidden" id="duelOptions">
+              <h3>Дуэль 1v1 по коду</h3>
+              <label class="field">
+                <span>Код комнаты</span>
+                <input type="text" id="duelRoomCode" placeholder="например: 8KF2" />
+              </label>
+              <div class="duel-actions">
+                <button class="btn-primary" id="createRoom">Создать комнату</button>
+                <button class="btn-outline" id="joinRoom">Подключиться</button>
+              </div>
+              <div class="field-hint" id="duelStatus">Создай комнату и отправь код другу.</div>
+            </div>
+
+            <div class="panel-block rules">
+              <h3>Правила</h3>
+              <ul>
+                <li>Игровое поле разделено центральной линией.</li>
+                <li>Фишки не пересекают середину, у каждого своя сторона.</li>
+                <li>Шайба стартует по центру, после гола — на стороне соперника.</li>
+                <li>Матч идёт до 3 голов. Победа даёт +200 ЭЛО.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="panel panel-right">
+            <div class="scoreboard">
+              <div class="score-box">
+                <span class="score-label">Ты</span>
+                <span class="score-value" id="scoreLeft">0</span>
+              </div>
+              <div class="score-meta">
+                <span>Матч до 3</span>
+                <span class="score-divider"></span>
+                <span id="matchStatus">Режим: Бот</span>
+              </div>
+              <div class="score-box">
+                <span class="score-label">Соперник</span>
+                <span class="score-value" id="scoreRight">0</span>
+              </div>
+            </div>
+
+            <div class="rink" id="rink">
+              <div class="rink-line"></div>
+              <div class="goal goal-left"></div>
+              <div class="goal goal-right"></div>
+              <div class="paddle paddle-left" id="paddleLeft"></div>
+              <div class="paddle paddle-right" id="paddleRight"></div>
+              <div class="puck" id="puck"></div>
+              <div class="rink-overlay" id="rinkOverlay">Нажми «Играть сейчас»</div>
+            </div>
+
+            <div class="arena-actions">
+              <button class="btn-primary" id="startMatch">Старт матча</button>
+              <button class="btn-outline" id="resetMatch">Сброс</button>
+            </div>
+            <div class="goal-toast" id="goalToast">ГОООЛ!</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="rating flow-section" id="rating">
+        <div class="section-head">
+          <h2>Система рейтинга</h2>
+          <p>Каждая победа увеличивает твоё ЭЛО на 200. Рейтинг виден в профиле и таблице лидеров.</p>
+        </div>
+        <div class="rating-grid">
+          <div class="rating-card">
+            <h3>ЭЛО +200</h3>
+            <p>Победа в матче автоматически добавляет 200 очков рейтинга. Система фиксирует количество игр.</p>
+          </div>
+          <div class="rating-card">
+            <h3>Контроль прогресса</h3>
+            <p>Следи за прогрессом в профиле: ник, ЭЛО и число сыгранных матчей обновляются мгновенно.</p>
+          </div>
+          <div class="rating-card">
+            <h3>Лидерборд</h3>
+            <p>Таблица лидеров обновляется локально и показывает топ игроков текущей сессии.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="leaderboard flow-section" id="leaderboard">
+        <div class="section-head">
+          <h2>Таблица лидеров</h2>
+          <p>Смотри, кто на вершине. Твой ник подсвечен в списке.</p>
+        </div>
+        <div class="leaderboard-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Место</th>
+                <th>Ник</th>
+                <th>ЭЛО</th>
+                <th>Матчи</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal" id="profileModal" aria-hidden="true">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h3>Профиль игрока</h3>
+          <button class="modal-close" id="closeProfile">Закрыть</button>
+        </div>
+        <div class="profile-info">
+          <div class="profile-row">
+            <span>Ник</span>
+            <strong id="profileName">Гость</strong>
+          </div>
+          <div class="profile-row">
+            <span>ЭЛО</span>
+            <strong id="profileElo">0</strong>
+          </div>
+          <div class="profile-row">
+            <span>Игр сыграно</span>
+            <strong id="profileGames">0</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="app.js"></script>
+  </body>
+</html>
