@@ -40,22 +40,11 @@
               <input type="text" id="regNickname" placeholder="StormPlayer" />
             </label>
             <label class="field">
-              <span>Email</span>
-              <input type="email" id="regEmail" placeholder="you@mail.com" />
-            </label>
-            <label class="field">
               <span>Пароль</span>
               <input type="password" id="regPassword" placeholder="••••••" />
             </label>
-            <div class="code-box hidden" id="codeBox">
-              <label class="field">
-                <span>Код из письма</span>
-                <input type="text" id="regCode" placeholder="123456" inputmode="numeric" />
-              </label>
-              <button type="button" class="btn-outline" id="confirmCode">Подтвердить код</button>
-            </div>
             <button type="submit" class="btn-primary">Создать профиль</button>
-            <div class="field-hint" id="registerStatus">Код регистрации будет показан на экране (демо).</div>
+            <div class="field-hint" id="registerStatus">Данные сохраняются в браузере.</div>
             <div class="flow-hint">Шаг 1 из 3. После подтверждения откроется вход.</div>
           </form>
         </div>
@@ -172,6 +161,47 @@
               <div class="field-hint" id="duelStatus">Создай комнату и отправь код другу.</div>
             </div>
 
+            <div class="panel-block shop">
+              <h3>Магазин персонажей</h3>
+              <div class="shop-grid">
+                <article class="shop-card" data-character="kompot">
+                  <div class="shop-avatar kompot-avatar"></div>
+                  <div class="shop-info">
+                    <strong>Компот</strong>
+                    <span>Больше размер, ниже скорость, хитбокс чуть больше обычного</span>
+                  </div>
+                  <button class="btn-outline shop-select">Выбрать</button>
+                </article>
+                <article class="shop-card" data-character="karamelka">
+                  <div class="shop-avatar karamelka-avatar"></div>
+                  <div class="shop-info">
+                    <strong>Карамелька</strong>
+                    <span>Бесплатно, скорость выше обычной, удар чуть сильнее</span>
+                  </div>
+                  <button class="btn-outline shop-select">Выбрать</button>
+                </article>
+                <article class="shop-card" data-character="korzhik">
+                  <div class="shop-avatar korzhik-avatar"></div>
+                  <div class="shop-info">
+                    <strong>Коржик</strong>
+                    <span>Бесплатно, скорость между Компотом и Карамелькой, удар сильнее Карамельки</span>
+                  </div>
+                  <button class="btn-outline shop-select">Выбрать</button>
+                </article>
+                <article class="shop-card" data-character="gonya">
+                  <div class="shop-avatar gonya-avatar"></div>
+                  <div class="shop-info">
+                    <strong>Гоня</strong>
+                    <span>Бесплатно, стандартные параметры</span>
+                  </div>
+                  <button class="btn-outline shop-select">Выбрать</button>
+                </article>
+              </div>
+              <div class="field-hint">
+                Фото Компота: <code>assets/kompot.jpg</code>, Карамельки: <code>assets/karamelka.jpg</code>,
+                Коржика: <code>assets/korzhik.jpg</code>, Гони: <code>assets/gonya.jpg</code>.
+              </div>
+            </div>
             <div class="panel-block rules">
               <h3>Правила</h3>
               <ul>

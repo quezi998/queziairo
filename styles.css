@@ -340,6 +340,69 @@ select {
   margin-top: 8px;
 }
 
+.shop-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.shop-card {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: #0f0f0f;
+}
+
+.shop-card.is-active {
+  border-color: #ffffff;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.shop-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid #1d1d1d;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.4);
+  background-size: cover;
+  background-position: center;
+}
+
+.standard-avatar {
+  background: radial-gradient(circle at 30% 30%, #fdfdfd, #7e7e7e 70%);
+}
+
+.kompot-avatar {
+  background-image: url("assets/kompot.jpg");
+}
+
+.karamelka-avatar {
+  background-image: url("assets/karamelka.jpg");
+}
+
+.korzhik-avatar {
+  background-image: url("assets/korzhik.jpg");
+}
+
+.gonya-avatar {
+  background-image: url("assets/gonya.jpg");
+}
+
+.shop-info {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.shop-info strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
 .duel-actions {
   display: flex;
   gap: 10px;
