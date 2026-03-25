@@ -21,17 +21,13 @@
         <span class="logo-mark">Айро Хоккей</span>
         <span class="logo-sub">за выигрыш +200 ЭЛО</span>
       </div>
-      <div class="top-actions">
-        <button class="btn-outline" id="openRegistrationTop">Регистрация</button>
-        <button class="profile-btn" id="profileBtn">Профиль</button>
-      </div>
     </header>
 
     <main>
       <section class="auth flow-section is-active" id="register">
         <div class="section-head">
           <h2>Регистрация</h2>
-          <p>Создай профиль, чтобы участвовать в рейтинге.</p>
+          <p>У тебя 0 ЭЛО. Создай профиль — данные сохраняются в браузере.</p>
         </div>
         <div class="auth-grid single">
           <form class="auth-card" id="registerForm" novalidate>
@@ -44,8 +40,8 @@
               <input type="password" id="regPassword" placeholder="••••••" />
             </label>
             <button type="submit" class="btn-primary">Создать профиль</button>
-            <div class="field-hint" id="registerStatus">Данные сохраняются в браузере.</div>
-            <div class="flow-hint">Шаг 1 из 3. После подтверждения откроется вход.</div>
+            <div class="field-hint" id="registerStatus">После регистрации откроется вход.</div>
+            <button type="button" class="btn-outline" id="goLogin">Войти</button>
           </form>
         </div>
       </section>
@@ -53,7 +49,7 @@
       <section class="auth flow-section" id="login">
         <div class="section-head">
           <h2>Вход</h2>
-          <p>Войди по нику и паролю, которые ты зарегистрировал.</p>
+          <p>Если ты уже регистрировался — введи пароль.</p>
         </div>
         <div class="auth-grid single">
           <form class="auth-card" id="loginForm" novalidate>
@@ -66,8 +62,8 @@
               <input type="password" id="loginPassword" placeholder="••••••" />
             </label>
             <button type="submit" class="btn-primary">Войти</button>
-            <div class="field-hint" id="loginStatus">Данные хранятся в браузере.</div>
-            <div class="flow-hint">Шаг 2 из 3. После входа откроется игра.</div>
+            <div class="field-hint" id="loginStatus">Введи пароль, чтобы войти.</div>
+            <button type="button" class="btn-outline" id="goRegister">Регистрация</button>
           </form>
         </div>
       </section>
@@ -75,56 +71,108 @@
       <section class="hero flow-section" id="home">
         <div class="hero-card">
           <div class="hero-top">
-            <div class="hero-badge">3D | Чёрно-белая арена</div>
+            <div class="hero-badge">Главное меню</div>
             <div class="hero-status" id="heroStatus">Сейчас в онлайне: 124</div>
           </div>
-          <h1>Айро Хоккей. Жёсткие дуэли, чистая геометрия, рейтинг за победу.</h1>
+          <h1>Выбери, куда идти дальше.</h1>
           <p>
-            Принцип прост: поле, два ворот, две фишки и шайба по центру. Твоя фишка слева, противник справа.
-            Линию середины пересекать нельзя. После гола шайба появляется на стороне соперника у центральной линии.
+            Магазин — выбор персонажа. Играть — режимы и матч. Профиль — твой ник и
+            любимый персонаж.
           </p>
-          <div class="hero-actions center">
-            <button class="btn-primary" id="playNow">Играть сейчас</button>
-            <button class="btn-outline" id="openArena">К арене</button>
+          <div class="menu-buttons">
+            <button class="menu-btn" id="openShop">Магазин</button>
+            <button class="menu-btn menu-btn--play" id="openPlay">Играть</button>
+            <button class="menu-btn" id="openProfile">Профиль</button>
           </div>
-          <div class="mode-center">
-            <div class="mode-title-center">Выбор режима</div>
-            <div class="mode-grid mode-center-grid">
-              <button class="mode-card is-active" data-mode="bot">
-                <span class="mode-title">Бот</span>
-                <span class="mode-desc">Разные уровни сложности</span>
-              </button>
-              <button class="mode-card" data-mode="online">
-                <span class="mode-title">Онлайн</span>
-                <span class="mode-desc">Подбор соперника</span>
-              </button>
-              <button class="mode-card" data-mode="duel">
-                <span class="mode-title">Дуэль</span>
-                <span class="mode-desc">Приглашение по нику</span>
-              </button>
+        </div>
+      </section>
+
+      <section class="panel flow-section" id="shop">
+        <div class="section-head">
+          <h2>Магазин</h2>
+          <p>Все персонажи бесплатные.</p>
+        </div>
+        <div class="shop-grid">
+          <article class="shop-card" data-character="kompot">
+            <div class="shop-avatar kompot-avatar"></div>
+            <div class="shop-info">
+              <strong>Компот</strong>
+              <span>Больше размер, ниже скорость, хитбокс чуть больше обычного</span>
             </div>
+            <button class="btn-outline shop-select">Выбрать</button>
+          </article>
+          <article class="shop-card" data-character="karamelka">
+            <div class="shop-avatar karamelka-avatar"></div>
+            <div class="shop-info">
+              <strong>Карамелька</strong>
+              <span>Скорость выше обычной, удар чуть сильнее</span>
+            </div>
+            <button class="btn-outline shop-select">Выбрать</button>
+          </article>
+          <article class="shop-card" data-character="korzhik">
+            <div class="shop-avatar korzhik-avatar"></div>
+            <div class="shop-info">
+              <strong>Коржик</strong>
+              <span>Скорость между Компотом и Карамелькой, удар сильнее Карамельки</span>
+            </div>
+            <button class="btn-outline shop-select">Выбрать</button>
+          </article>
+          <article class="shop-card" data-character="gonya">
+            <div class="shop-avatar gonya-avatar"></div>
+            <div class="shop-info">
+              <strong>Гоня</strong>
+              <span>Стандартные параметры</span>
+            </div>
+            <button class="btn-outline shop-select">Выбрать</button>
+          </article>
+        </div>
+        <div class="field-hint">В ожидании новых персонажей.</div>
+      </section>
+
+      <section class="panel flow-section" id="profile">
+        <div class="section-head">
+          <h2>Профиль</h2>
+          <p>Твой прогресс и любимый персонаж.</p>
+        </div>
+        <div class="profile-info">
+          <div class="profile-row">
+            <span>Ник</span>
+            <strong id="profileName">Гость</strong>
           </div>
-          <div class="hero-metrics">
-            <div class="metric">
-              <span class="metric-value" id="metricElo">0</span>
-              <span class="metric-label">текущее ЭЛО</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value" id="metricGames">0</span>
-              <span class="metric-label">игр сыграно</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value">+200</span>
-              <span class="metric-label">за победу</span>
-            </div>
+          <div class="profile-row">
+            <span>ЭЛО</span>
+            <strong id="profileElo">0</strong>
+          </div>
+          <div class="profile-row">
+            <span>Игр сыграно</span>
+            <strong id="profileGames">0</strong>
+          </div>
+          <div class="profile-row">
+            <span>Любимый персонаж</span>
+            <strong id="profileFavorite">Стандарт</strong>
           </div>
         </div>
       </section>
 
       <section class="arena flow-section" id="arena">
         <div class="section-head">
-          <h2>Игровая арена</h2>
-          <p>Выбери режим: бот, онлайн или дуэль. В дуэли укажи ник соперника. В онлайне включается подбор.</p>
+          <h2>Играть</h2>
+          <p>Выбери режим: онлайн, с ботом или дуэль.</p>
+        </div>
+
+        <div class="mode-grid play-grid">
+          <button class="mode-card" data-mode="online" id="playOnline">
+            <span class="mode-title">Онлайн</span>
+            <span class="mode-desc">Подбор участников</span>
+          </button>
+          <button class="mode-card is-active" data-mode="bot" id="playBot">
+            <span class="mode-title">С ботом</span>
+            <span class="mode-desc">Бот атакует и защищает ворота</span>
+          </button>
+          <button class="mode-card" data-mode="duel" id="playDuel">
+            <span class="mode-title">Дуэль</span>
+            <span class="mode-desc">Приглашение по нику</span>
+          </button>
         </div>
 
         <div class="arena-layout">
@@ -139,7 +187,7 @@
                   <option value="hard">Жёсткий</option>
                 </select>
               </label>
-              <div class="field-hint">Бот держится на своей половине и реагирует на шайбу.</div>
+              <div class="field-hint">Бот пытается забить и защищает свои ворота.</div>
             </div>
 
             <div class="panel-block hidden" id="onlineOptions">
@@ -149,59 +197,15 @@
             </div>
 
             <div class="panel-block hidden" id="duelOptions">
-              <h3>Дуэль 1v1 по коду</h3>
+              <h3>Дуэль по нику</h3>
               <label class="field">
-                <span>Код комнаты</span>
-                <input type="text" id="duelRoomCode" placeholder="например: 8KF2" />
+                <span>Ник соперника</span>
+                <input type="text" id="duelNickname" placeholder="например: FrostPlayer" />
               </label>
-              <div class="duel-actions">
-                <button class="btn-primary" id="createRoom">Создать комнату</button>
-                <button class="btn-outline" id="joinRoom">Подключиться</button>
-              </div>
-              <div class="field-hint" id="duelStatus">Создай комнату и отправь код другу.</div>
+              <button class="btn-outline" id="sendInvite">Вызвать в дуэль</button>
+              <div class="field-hint" id="duelStatus">Ожидание ответа.</div>
             </div>
 
-            <div class="panel-block shop">
-              <h3>Магазин персонажей</h3>
-              <div class="shop-grid">
-                <article class="shop-card" data-character="kompot">
-                  <div class="shop-avatar kompot-avatar"></div>
-                  <div class="shop-info">
-                    <strong>Компот</strong>
-                    <span>Больше размер, ниже скорость, хитбокс чуть больше обычного</span>
-                  </div>
-                  <button class="btn-outline shop-select">Выбрать</button>
-                </article>
-                <article class="shop-card" data-character="karamelka">
-                  <div class="shop-avatar karamelka-avatar"></div>
-                  <div class="shop-info">
-                    <strong>Карамелька</strong>
-                    <span>Бесплатно, скорость выше обычной, удар чуть сильнее</span>
-                  </div>
-                  <button class="btn-outline shop-select">Выбрать</button>
-                </article>
-                <article class="shop-card" data-character="korzhik">
-                  <div class="shop-avatar korzhik-avatar"></div>
-                  <div class="shop-info">
-                    <strong>Коржик</strong>
-                    <span>Бесплатно, скорость между Компотом и Карамелькой, удар сильнее Карамельки</span>
-                  </div>
-                  <button class="btn-outline shop-select">Выбрать</button>
-                </article>
-                <article class="shop-card" data-character="gonya">
-                  <div class="shop-avatar gonya-avatar"></div>
-                  <div class="shop-info">
-                    <strong>Гоня</strong>
-                    <span>Бесплатно, стандартные параметры</span>
-                  </div>
-                  <button class="btn-outline shop-select">Выбрать</button>
-                </article>
-              </div>
-              <div class="field-hint">
-                Фото Компота: <code>assets/kompot.jpg</code>, Карамельки: <code>assets/karamelka.jpg</code>,
-                Коржика: <code>assets/korzhik.jpg</code>, Гони: <code>assets/gonya.jpg</code>.
-              </div>
-            </div>
             <div class="panel-block rules">
               <h3>Правила</h3>
               <ul>
@@ -248,76 +252,26 @@
           </div>
         </div>
       </section>
-
-      <section class="rating flow-section" id="rating">
-        <div class="section-head">
-          <h2>Система рейтинга</h2>
-          <p>Каждая победа увеличивает твоё ЭЛО на 200. Рейтинг виден в профиле и таблице лидеров.</p>
-        </div>
-        <div class="rating-grid">
-          <div class="rating-card">
-            <h3>ЭЛО +200</h3>
-            <p>Победа в матче автоматически добавляет 200 очков рейтинга. Система фиксирует количество игр.</p>
-          </div>
-          <div class="rating-card">
-            <h3>Контроль прогресса</h3>
-            <p>Следи за прогрессом в профиле: ник, ЭЛО и число сыгранных матчей обновляются мгновенно.</p>
-          </div>
-          <div class="rating-card">
-            <h3>Лидерборд</h3>
-            <p>Таблица лидеров обновляется локально и показывает топ игроков текущей сессии.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="leaderboard flow-section" id="leaderboard">
-        <div class="section-head">
-          <h2>Таблица лидеров</h2>
-          <p>Смотри, кто на вершине. Твой ник подсвечен в списке.</p>
-        </div>
-        <div class="leaderboard-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Место</th>
-                <th>Ник</th>
-                <th>ЭЛО</th>
-                <th>Матчи</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboardBody"></tbody>
-          </table>
-        </div>
-      </section>
     </main>
 
-    <div class="modal" id="profileModal" aria-hidden="true">
+    <div class="modal" id="duelModal" aria-hidden="true">
       <div class="modal-card">
         <div class="modal-head">
-          <h3>Профиль игрока</h3>
-          <button class="modal-close" id="closeProfile">Закрыть</button>
+          <h3 id="duelModalTitle">Дуэль</h3>
+          <button class="modal-close" id="closeDuelModal">Закрыть</button>
         </div>
         <div class="profile-info">
           <div class="profile-row">
-            <span>Ник</span>
-            <strong id="profileName">Гость</strong>
+            <span id="duelModalText">Ник хочет сыграть с вами.</span>
           </div>
-          <div class="profile-row">
-            <span>ЭЛО</span>
-            <strong id="profileElo">0</strong>
-          </div>
-          <div class="profile-row">
-            <span>Игр сыграно</span>
-            <strong id="profileGames">0</strong>
-          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-primary" id="acceptDuel">Принять</button>
+          <button class="btn-outline" id="declineDuel">Отклонить</button>
         </div>
       </div>
     </div>
 
-    <script
-      src="https://cdn.socket.io/4.7.5/socket.io.min.js"
-      crossorigin="anonymous"
-    ></script>
     <script src="app.js"></script>
   </body>
 </html>
