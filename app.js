@@ -1,28 +1,24 @@
 ﻿const profileKey = "airHockeyProfile";
 const leaderboardKey = "airHockeyLeaderboard";
 const userKey = "airHockeyUser";
-const apiBase =
-  window.location.origin === "null" ? "http://localhost:4000" : window.location.origin;
+const registerDraftKey = "airHockeyRegisterDraft";
 
 const matchTarget = 3;
 const goalToastDuration = 1200;
 const goalCooldownMs = 700;
-const stateSendInterval = 60;
 const characterKey = "airHockeyCharacter";
+const characterStatsKey = "airHockeyCharacterStats";
 
 const ui = {
-  profileBtn: document.getElementById("profileBtn"),
-  profileModal: document.getElementById("profileModal"),
-  closeProfile: document.getElementById("closeProfile"),
+  profileModal: document.getElementById("profile"),
   profileName: document.getElementById("profileName"),
   profileElo: document.getElementById("profileElo"),
   profileGames: document.getElementById("profileGames"),
-  metricElo: document.getElementById("metricElo"),
-  metricGames: document.getElementById("metricGames"),
+  profileFavorite: document.getElementById("profileFavorite"),
   heroStatus: document.getElementById("heroStatus"),
-  playNow: document.getElementById("playNow"),
-  openRegistrationTop: document.getElementById("openRegistrationTop"),
-  openArena: document.getElementById("openArena"),
+  openShop: document.getElementById("openShop"),
+  openPlay: document.getElementById("openPlay"),
+  openProfile: document.getElementById("openProfile"),
   startMatch: document.getElementById("startMatch"),
   resetMatch: document.getElementById("resetMatch"),
   scoreLeft: document.getElementById("scoreLeft"),
@@ -34,18 +30,15 @@ const ui = {
   paddleRight: document.getElementById("paddleRight"),
   puck: document.getElementById("puck"),
   goalToast: document.getElementById("goalToast"),
-  modeCards: document.querySelectorAll(".mode-card"),
   botOptions: document.getElementById("botOptions"),
   onlineOptions: document.getElementById("onlineOptions"),
   duelOptions: document.getElementById("duelOptions"),
   botDifficulty: document.getElementById("botDifficulty"),
   queueToggle: document.getElementById("queueToggle"),
   queueStatus: document.getElementById("queueStatus"),
-  duelRoomCode: document.getElementById("duelRoomCode"),
-  createRoom: document.getElementById("createRoom"),
-  joinRoom: document.getElementById("joinRoom"),
+  duelNickname: document.getElementById("duelNickname"),
+  sendInvite: document.getElementById("sendInvite"),
   duelStatus: document.getElementById("duelStatus"),
-  leaderboardBody: document.getElementById("leaderboardBody"),
   registerForm: document.getElementById("registerForm"),
   regNickname: document.getElementById("regNickname"),
   regPassword: document.getElementById("regPassword"),
@@ -54,42 +47,53 @@ const ui = {
   loginNickname: document.getElementById("loginNickname"),
   loginPassword: document.getElementById("loginPassword"),
   loginStatus: document.getElementById("loginStatus"),
+  goLogin: document.getElementById("goLogin"),
+  goRegister: document.getElementById("goRegister"),
+  registeredLogin: document.getElementById("registeredLogin"),
+  registeredProfile: document.getElementById("registeredProfile"),
+  registeredNick: document.getElementById("registeredNick"),
   shopCards: document.querySelectorAll(".shop-card"),
   shopButtons: document.querySelectorAll(".shop-select"),
+  duelModal: document.getElementById("duelModal"),
+  duelModalTitle: document.getElementById("duelModalTitle"),
+  duelModalText: document.getElementById("duelModalText"),
+  closeDuelModal: document.getElementById("closeDuelModal"),
+  acceptDuel: document.getElementById("acceptDuel"),
+  declineDuel: document.getElementById("declineDuel"),
 };
 
 const state = {
   profile: {
-    nickname: "Р“РѕСЃС‚СЊ",
+    nickname: "Гость",
     elo: 0,
     games: 0,
   },
   mode: "bot",
   botDifficulty: "normal",
   queue: false,
+  authenticated: false,
   scores: { left: 0, right: 0 },
   playing: false,
-  rink: {
-    width: 0,
-    height: 0,
-  },
+  rink: { width: 0, height: 0 },
   leftPaddle: { x: 0, y: 0 },
   rightPaddle: { x: 0, y: 0 },
   puck: { x: 0, y: 0, vx: 220, vy: 120 },
   lastTime: 0,
-  onlineRole: null,
-  roomCode: null,
-  duelConnected: false,
-  lastSend: 0,
   lastGoalAt: 0,
   matchLocked: false,
   controlTarget: null,
-  character: "standard",
+  character: "kompot",
+  characterStats: {},
 };
 
-const sectionOrder = ["register", "login", "home", "arena", "rating", "leaderboard"];
+const sectionOrder = ["register", "registered", "login", "home", "shop", "profile", "arena"];
 
 const showSection = (id) => {
+  const protectedSections = ["home", "shop", "profile", "arena"];
+  if (protectedSections.includes(id) && !state.authenticated) {
+    const storedUser = loadUser();
+    id = storedUser ? "login" : "register";
+  }
   sectionOrder.forEach((key) => {
     const el = document.getElementById(key);
     if (!el) return;
@@ -105,18 +109,9 @@ const botSpeedMap = {
 };
 
 const characters = {
-  standard: {
-    id: "standard",
-    label: "РЎС‚Р°РЅРґР°СЂС‚",
-    speed: 1000,
-    radius: 23,
-    hitRadius: 23,
-    hitBoost: 60,
-    image: "",
-  },
   kompot: {
     id: "kompot",
-    label: "РљРѕРјРїРѕС‚",
+    label: "Компот",
     speed: 520,
     radius: 30,
     hitRadius: 27,
@@ -125,7 +120,7 @@ const characters = {
   },
   karamelka: {
     id: "karamelka",
-    label: "РљР°СЂР°РјРµР»СЊРєР°",
+    label: "Карамелька",
     speed: 1150,
     radius: 23,
     hitRadius: 23,
@@ -134,7 +129,7 @@ const characters = {
   },
   korzhik: {
     id: "korzhik",
-    label: "РљРѕСЂР¶РёРє",
+    label: "Коржик",
     speed: 850,
     radius: 23,
     hitRadius: 23,
@@ -143,7 +138,7 @@ const characters = {
   },
   gonya: {
     id: "gonya",
-    label: "Р“РѕРЅСЏ",
+    label: "Гоня",
     speed: 1000,
     radius: 23,
     hitRadius: 23,
@@ -183,98 +178,65 @@ const saveUser = (user) => {
   localStorage.setItem(userKey, JSON.stringify(user));
 };
 
-const canUseStorage = () => {
+const saveRegisterDraft = (draft) => {
+  localStorage.setItem(registerDraftKey, JSON.stringify(draft));
+};
+
+const loadRegisterDraft = () => {
+  const stored = localStorage.getItem(registerDraftKey);
+  if (!stored) return { nickname: "", password: "" };
   try {
-    const key = "__test";
-    localStorage.setItem(key, "1");
-    localStorage.removeItem(key);
-    return true;
+    return JSON.parse(stored);
   } catch (err) {
-    return false;
+    return { nickname: "", password: "" };
   }
 };
 
 const loadCharacter = () => {
   const stored = localStorage.getItem(characterKey);
   if (stored && characters[stored]) return stored;
-  return "standard";
+  return "kompot";
 };
 
 const saveCharacter = (id) => {
   localStorage.setItem(characterKey, id);
 };
 
-const isValidPassword = (value) => value && value.length >= 4;\r\n\r\nconst defaultLeaderboard = () => [];
-
-const loadLeaderboard = () => {
-  const stored = localStorage.getItem(leaderboardKey);
-  if (!stored) return defaultLeaderboard();
+const loadCharacterStats = () => {
+  const stored = localStorage.getItem(characterStatsKey);
+  if (!stored) return {};
   try {
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed : defaultLeaderboard();
+    return JSON.parse(stored);
   } catch (err) {
-    return defaultLeaderboard();
+    return {};
   }
 };
 
-const saveLeaderboard = (data) => {
-  localStorage.setItem(leaderboardKey, JSON.stringify(data));
+const saveCharacterStats = () => {
+  localStorage.setItem(characterStatsKey, JSON.stringify(state.characterStats));
 };
 
-let leaderboard = loadLeaderboard();
-
-const syncLeaderboard = () => {
-  const filtered = leaderboard.filter((row) => row.name !== "РўС‹");
-  if (state.profile.nickname && state.profile.nickname !== "Р“РѕСЃС‚СЊ") {
-    const existing = filtered.find((row) => row.name === state.profile.nickname);
-    if (existing) {
-      existing.elo = state.profile.elo;
-      existing.games = state.profile.games;
-    } else {
-      filtered.push({ name: state.profile.nickname, elo: state.profile.elo, games: state.profile.games });
-    }
-  }
-  filtered.sort((a, b) => b.elo - a.elo);
-  leaderboard = filtered.map((row, index) => ({ ...row, rank: index + 1 }));
-  saveLeaderboard(leaderboard);
-  renderLeaderboard();
-};
-
-const renderLeaderboard = () => {
-  ui.leaderboardBody.innerHTML = "";
-  if (!leaderboard.length) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = "<td colspan=\"4\">РџРѕРєР° РЅРµС‚ РёРіСЂРѕРєРѕРІ РЅР° СЃРµСЂРІРµСЂРµ.</td>";
-    ui.leaderboardBody.appendChild(tr);
-    return;
-  }
-  leaderboard.forEach((row) => {
-    const tr = document.createElement("tr");
-    if (row.name === state.profile.nickname) {
-      tr.classList.add("highlight");
-    }
-    tr.innerHTML = `
-      <td>${row.rank}</td>
-      <td>${row.name}</td>
-      <td>${row.elo}</td>
-      <td>${row.games}</td>
-    `;
-    ui.leaderboardBody.appendChild(tr);
-  });
-};
+const isValidPassword = (value) => value && value.length >= 4;
 
 const updateProfileUI = () => {
   ui.profileName.textContent = state.profile.nickname;
   ui.profileElo.textContent = state.profile.elo;
   ui.profileGames.textContent = state.profile.games;
-  ui.metricElo.textContent = state.profile.elo;
-  ui.metricGames.textContent = state.profile.games;
+  ui.profileFavorite.textContent = getFavoriteCharacterLabel();
+};
+
+const getFavoriteCharacterLabel = () => {
+  const entries = Object.entries(state.characterStats);
+  if (!entries.length) return "Компот";
+  entries.sort((a, b) => b[1] - a[1]);
+  const top = entries[0][0];
+  return characters[top]?.label || "Компот";
 };
 
 const updateHeroStatus = () => {
   const now = new Date();
   const seed = now.getUTCMinutes();
-  ui.heroStatus.textContent = `РЎРµР№С‡Р°СЃ РІ РѕРЅР»Р°Р№РЅРµ: ${120 + (seed % 40)}`;
+  ui.heroStatus.textContent = `Сейчас в онлайне: ${120 + (seed % 40)}`;
 };
 
 const showToast = (text) => {
@@ -283,16 +245,12 @@ const showToast = (text) => {
   setTimeout(() => ui.goalToast.classList.remove("show"), goalToastDuration);
 };
 
-const openProfile = () => ui.profileModal.classList.add("show");
-const closeProfile = () => ui.profileModal.classList.remove("show");
-
 const applyCharacter = (id) => {
-  const character = characters[id] || characters.standard;
+  const character = characters[id] || characters.kompot;
   state.character = character.id;
   saveCharacter(character.id);
 
-  const isGuest = state.mode === "duel" && state.onlineRole === "guest";
-  const targetPaddle = isGuest ? state.rightPaddle : state.leftPaddle;
+  const targetPaddle = state.leftPaddle;
   targetPaddle.radius = character.radius;
   targetPaddle.hitRadius = character.hitRadius;
   targetPaddle.hitBoost = character.hitBoost;
@@ -304,7 +262,7 @@ const applyCharacter = (id) => {
   ui.shopButtons.forEach((btn) => {
     const card = btn.closest(".shop-card");
     if (!card) return;
-    btn.textContent = card.dataset.character === character.id ? "Р’С‹Р±СЂР°РЅ" : "Р’С‹Р±СЂР°С‚СЊ";
+    btn.textContent = card.dataset.character === character.id ? "Выбран" : "Выбрать";
   });
 };
 
@@ -317,30 +275,22 @@ const updatePaddleStyles = () => {
   ui.paddleRight.style.width = `${right * 2}px`;
   ui.paddleRight.style.height = `${right * 2}px`;
 
-  const isGuest = state.mode === "duel" && state.onlineRole === "guest";
-  const target = isGuest ? ui.paddleRight : ui.paddleLeft;
-  const character = characters[state.character] || characters.standard;
+  const character = characters[state.character] || characters.kompot;
   if (character.image) {
-    target.style.backgroundImage = `url(${character.image})`;
-    target.style.backgroundSize = "cover";
-    target.style.backgroundPosition = "center";
-  } else {
-    ui.paddleLeft.style.backgroundImage = "";
-    ui.paddleRight.style.backgroundImage = "";
+    ui.paddleLeft.style.backgroundImage = `url(${character.image})`;
+    ui.paddleLeft.style.backgroundSize = "cover";
+    ui.paddleLeft.style.backgroundPosition = "center";
   }
 };
 
 const updateModeUI = () => {
-  ui.modeCards.forEach((card) => {
-    card.classList.toggle("is-active", card.dataset.mode === state.mode);
-  });
   ui.botOptions.classList.toggle("hidden", state.mode !== "bot");
   ui.onlineOptions.classList.toggle("hidden", state.mode !== "online");
   ui.duelOptions.classList.toggle("hidden", state.mode !== "duel");
   const labelMap = {
-    bot: "Р РµР¶РёРј: Р‘РѕС‚",
-    online: "Р РµР¶РёРј: РћРЅР»Р°Р№РЅ",
-    duel: state.roomCode ? `Р”СѓСЌР»СЊ: ${state.roomCode}` : "Р РµР¶РёРј: Р”СѓСЌР»СЊ",
+    bot: "Режим: Бот",
+    online: "Режим: Онлайн",
+    duel: "Режим: Дуэль",
   };
   ui.matchStatus.textContent = labelMap[state.mode];
   applyCharacter(state.character);
@@ -392,34 +342,49 @@ const draw = () => {
   ui.puck.style.transform = `translate(${state.puck.x - 12}px, ${state.puck.y - 12}px)`;
 };
 
-const handleGoal = (scorer) => {\r\n  const now = Date.now();\r\n  if (now - state.lastGoalAt < goalCooldownMs || state.matchLocked) {\r\n    return;\r\n  }\r\n  state.lastGoalAt = now;\r\n\r\n  if (scorer === "left") {
+const handleGoal = (scorer) => {
+  const now = Date.now();
+  if (now - state.lastGoalAt < goalCooldownMs || state.matchLocked) {
+    return;
+  }
+  state.lastGoalAt = now;
+
+  if (scorer === "left") {
     state.scores.left += 1;
     ui.scoreLeft.textContent = state.scores.left;
-    showToast("РўРІРѕР№ РіРѕР»!");
+    showToast("Твой гол!");
   } else {
     state.scores.right += 1;
     ui.scoreRight.textContent = state.scores.right;
-    showToast("Р“РѕР» СЃРѕРїРµСЂРЅРёРєР°");
+    showToast("Гол соперника");
   }
 
   const matchOver = state.scores.left >= matchTarget || state.scores.right >= matchTarget;
 
-  if (matchOver) {\r\n    state.matchLocked = true;
+  if (matchOver) {
+    state.matchLocked = true;
     if (state.scores.left > state.scores.right) {
       state.profile.elo += 200;
       state.profile.games += 1;
       saveProfile();
       updateProfileUI();
-      syncLeaderboard();
-      showToast("РџРѕР±РµРґР°! +200 Р­Р›Рћ");
+      showToast("Победа! +200 ЭЛО");
     } else {
       state.profile.games += 1;
       saveProfile();
       updateProfileUI();
-      syncLeaderboard();
-      showToast("РњР°С‚С‡ Р·Р°РІРµСЂС€С‘РЅ");
+      showToast("Матч завершён");
     }
-    resetScores();\r\n    setTimeout(() => {\r\n      state.matchLocked = false;\r\n    }, goalCooldownMs);\r\n  }
+
+    state.characterStats[state.character] = (state.characterStats[state.character] || 0) + 1;
+    saveCharacterStats();
+    updateProfileUI();
+
+    resetScores();
+    setTimeout(() => {
+      state.matchLocked = false;
+    }, goalCooldownMs);
+  }
 
   const { width, height } = state.rink;
   state.puck.y = height / 2;
@@ -450,20 +415,18 @@ const updatePhysics = (delta) => {
     if (state.puck.y >= goalTop && state.puck.y <= goalBottom) {
       handleGoal("right");
       return;
-    } else {
-      state.puck.vx *= -1;
-      state.puck.x = puckRadius + 1;
     }
+    state.puck.vx *= -1;
+    state.puck.x = puckRadius + 1;
   }
 
   if (state.puck.x + puckRadius >= width) {
     if (state.puck.y >= goalTop && state.puck.y <= goalBottom) {
       handleGoal("left");
       return;
-    } else {
-      state.puck.vx *= -1;
-      state.puck.x = width - puckRadius - 1;
     }
+    state.puck.vx *= -1;
+    state.puck.x = width - puckRadius - 1;
   }
 
   const collide = (paddle, paddleRadius) => {
@@ -532,13 +495,11 @@ const tick = (timestamp) => {
   const delta = Math.min((timestamp - state.lastTime) / 1000, 0.02);
   state.lastTime = timestamp;
 
-  const duelActive = state.mode === "duel" && state.duelConnected;
-
   if (state.controlTarget) {
-    const character = characters[state.character] || characters.standard;
+    const character = characters[state.character] || characters.kompot;
     const speed = character.speed;
-    const { x, y, side } = state.controlTarget;
-    const paddle = side === "left" ? state.leftPaddle : state.rightPaddle;
+    const { x, y } = state.controlTarget;
+    const paddle = state.leftPaddle;
     const dx = x - paddle.x;
     const dy = y - paddle.y;
     const dist = Math.hypot(dx, dy);
@@ -549,161 +510,136 @@ const tick = (timestamp) => {
         paddle,
         paddle.x + (dx / dist) * move,
         paddle.y + (dy / dist) * move,
-        side === "left"
+        true
       );
     }
   }
 
   if (state.mode === "bot") {
     updateBot(delta);
-  } else if (!duelActive) {
+  } else {
     updateIdleOpponent(delta);
   }
 
-  if (!duelActive || state.onlineRole === "host") {
-    updatePhysics(delta);
-  }
-
-  if (duelActive && state.onlineRole === "host") {
-    const now = Date.now();
-    if (now - state.lastSend > stateSendInterval && state.roomCode && socket) {
-      state.lastSend = now;
-      socket.emit("state:update", {
-        code: state.roomCode,
-        puck: state.puck,
-        scores: state.scores,
-      });
-    }
-  }
-
+  updatePhysics(delta);
   draw();
   requestAnimationFrame(tick);
 };
 
-let socket = null;
-
-const initSocket = () => {
-  if (!window.io) return;
-  socket = window.io(apiBase, { transports: ["websocket", "polling"] });
-
-  socket.on("connect", () => {
-    ui.duelStatus.textContent = "РЎРµСЂРІРµСЂ РїРѕРґРєР»СЋС‡С‘РЅ. РЎРѕР·РґР°Р№ РєРѕРјРЅР°С‚Сѓ РёР»Рё РІРІРµРґРё РєРѕРґ.";
+if (ui.rink) {
+  ui.rink.addEventListener("mousemove", (event) => {
+    if (!state.playing) return;
+    const rect = ui.rink.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    state.controlTarget = { x, y };
   });
+}
 
-  socket.on("disconnect", () => {
-    ui.duelStatus.textContent = "РЎРѕРµРґРёРЅРµРЅРёРµ СЃ СЃРµСЂРІРµСЂРѕРј РїРѕС‚РµСЂСЏРЅРѕ.";
-    state.duelConnected = false;
-    state.roomCode = null;
-    state.onlineRole = null;
-    updateModeUI();
+if (ui.botDifficulty) {
+  ui.botDifficulty.addEventListener("change", (event) => {
+    state.botDifficulty = event.target.value;
   });
+}
 
-  socket.on("room:created", ({ code, role }) => {
-    state.roomCode = code;
-    state.onlineRole = role;
-    state.duelConnected = false;
-    ui.duelRoomCode.value = code;
-    ui.duelStatus.textContent = `РљРѕРјРЅР°С‚Р° СЃРѕР·РґР°РЅР°: ${code}. Р–РґС‘Рј РґСЂСѓРіР°...`;
-    updateModeUI();
+if (ui.queueToggle) {
+  ui.queueToggle.addEventListener("click", () => {
+    state.queue = !state.queue;
+    ui.queueToggle.textContent = state.queue ? "Выйти из очереди" : "Встать в очередь";
+    ui.queueStatus.textContent = state.queue ? "Подбор участников..." : "Очередь выключена";
   });
+}
 
-  socket.on("room:joined", ({ code, role }) => {
-    state.roomCode = code;
-    state.onlineRole = role;
-    state.duelConnected = true;
-    ui.duelRoomCode.value = code;
-    ui.duelStatus.textContent = `РџРѕРґРєР»СЋС‡РµРЅРѕ Рє РєРѕРјРЅР°С‚Рµ ${code}.`;
-    updateModeUI();
-  });
-
-  socket.on("room:ready", ({ code }) => {
-    state.duelConnected = true;
-    ui.duelStatus.textContent = `Р”СЂСѓРі РїРѕРґРєР»СЋС‡РёР»СЃСЏ Рє РєРѕРјРЅР°С‚Рµ ${code}.`;
-    updateModeUI();
-  });
-
-  socket.on("room:error", ({ message }) => {
-    ui.duelStatus.textContent = message || "РћС€РёР±РєР° РєРѕРјРЅР°С‚С‹.";
-  });
-
-  socket.on("paddle:update", ({ x, y, side }) => {
-    if (side === "left") {
-      setPaddlePosition(state.leftPaddle, x, y, true);
-    } else {
-      setPaddlePosition(state.rightPaddle, x, y, false);
+if (ui.sendInvite) {
+  ui.sendInvite.addEventListener("click", () => {
+    const nick = ui.duelNickname.value.trim();
+    if (!nick) {
+      ui.duelStatus.textContent = "Введите ник соперника.";
+      return;
     }
+    ui.duelModalTitle.textContent = "Дуэль";
+    ui.duelModalText.textContent = `${nick} хочет сыграть в дуэль с вами.`;
+    ui.duelModal.classList.add("show");
   });
+}
 
-  socket.on("state:update", ({ puck, scores }) => {
-    if (state.onlineRole === "guest") {
-      state.puck = { ...state.puck, ...puck };
-      state.scores = { ...state.scores, ...scores };
-      ui.scoreLeft.textContent = state.scores.left;
-      ui.scoreRight.textContent = state.scores.right;
-    }
+if (ui.closeDuelModal) {
+  ui.closeDuelModal.addEventListener("click", () => {
+    ui.duelModal.classList.remove("show");
   });
+}
 
-  socket.on("match:reset", () => {
-    resetScores();\r\n    setTimeout(() => {\r\n      state.matchLocked = false;\r\n    }, goalCooldownMs);\r\n  });
-};
-
-ui.rink.addEventListener("mousemove", (event) => {
-  if (!state.playing) return;
-  const rect = ui.rink.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-
-  const duelActive = state.mode === "duel" && state.duelConnected;
-  const isLeft = !duelActive || state.onlineRole === "host";
-  state.controlTarget = { x, y, side: isLeft ? "left" : "right" };
-
-  if (duelActive && socket && state.roomCode) {
-    socket.emit("paddle:update", {
-      code: state.roomCode,
-      x: isLeft ? state.leftPaddle.x : state.rightPaddle.x,
-      y: isLeft ? state.leftPaddle.y : state.rightPaddle.y,
-      side: isLeft ? "left" : "right",
-    });
-  }
-});
-
-ui.modeCards.forEach((card) => {
-  card.addEventListener("click", () => {
-    state.mode = card.dataset.mode;
-    updateModeUI();
+if (ui.acceptDuel) {
+  ui.acceptDuel.addEventListener("click", () => {
+    ui.duelModal.classList.remove("show");
+    ui.duelStatus.textContent = "Дуэль принята. Старт!";
   });
-});
+}
 
-ui.botDifficulty.addEventListener("change", (event) => {
-  state.botDifficulty = event.target.value;
-});
+if (ui.declineDuel) {
+  ui.declineDuel.addEventListener("click", () => {
+    ui.duelModal.classList.remove("show");
+    ui.duelStatus.textContent = "Дуэль отклонена.";
+  });
+}
 
-ui.queueToggle.addEventListener("click", () => {
-  state.queue = !state.queue;
-  ui.queueToggle.textContent = state.queue ? "Р’С‹Р№С‚Рё РёР· РѕС‡РµСЂРµРґРё" : "Р’СЃС‚Р°С‚СЊ РІ РѕС‡РµСЂРµРґСЊ";
-  ui.queueStatus.textContent = state.queue ? "РџРѕРёСЃРє СЃРѕРїРµСЂРЅРёРєР°..." : "РћС‡РµСЂРµРґСЊ РІС‹РєР»СЋС‡РµРЅР°";
-});
+if (ui.startMatch) {
+  ui.startMatch.addEventListener("click", () => {
+    state.playing = true;
+    ui.rinkOverlay.classList.add("hidden");
+  });
+}
 
-ui.createRoom.addEventListener("click", () => {
-  if (!socket) {
-    ui.duelStatus.textContent = "РќРµС‚ СЃРѕРµРґРёРЅРµРЅРёСЏ СЃ СЃРµСЂРІРµСЂРѕРј.";
-    return;
-  }
-  socket.emit("room:create");
-});
+if (ui.resetMatch) {
+  ui.resetMatch.addEventListener("click", () => {
+    resetScores();
+    resetPositions();
+    draw();
+    showToast("Матч сброшен");
+  });
+}
 
-ui.joinRoom.addEventListener("click", () => {
-  const code = ui.duelRoomCode.value.trim().toUpperCase();
-  if (!code) {
-    ui.duelStatus.textContent = "Р’РІРµРґРёС‚Рµ РєРѕРґ РєРѕРјРЅР°С‚С‹.";
-    return;
-  }
-  if (!socket) {
-    ui.duelStatus.textContent = "РќРµС‚ СЃРѕРµРґРёРЅРµРЅРёСЏ СЃ СЃРµСЂРІРµСЂРѕРј.";
-    return;
-  }
-  socket.emit("room:join", { code });
-});
+if (ui.openShop) {
+  ui.openShop.addEventListener("click", () => {
+    showSection("shop");
+  });
+}
+
+if (ui.openPlay) {
+  ui.openPlay.addEventListener("click", () => {
+    showSection("arena");
+  });
+}
+
+if (ui.openProfile) {
+  ui.openProfile.addEventListener("click", () => {
+    showSection("profile");
+  });
+}
+
+if (ui.goLogin) {
+  ui.goLogin.addEventListener("click", () => {
+    showSection("login");
+  });
+}
+
+if (ui.goRegister) {
+  ui.goRegister.addEventListener("click", () => {
+    showSection("register");
+  });
+}
+
+if (ui.registeredLogin) {
+  ui.registeredLogin.addEventListener("click", () => {
+    showSection("login");
+  });
+}
+
+if (ui.registeredProfile) {
+  ui.registeredProfile.addEventListener("click", () => {
+    showSection("profile");
+  });
+}
 
 ui.shopButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -713,103 +649,94 @@ ui.shopButtons.forEach((btn) => {
   });
 });
 
-ui.startMatch.addEventListener("click", () => {
-  state.playing = true;
-  ui.rinkOverlay.classList.add("hidden");
-});
+const updateRegisterDraft = () => {
+  if (!ui.regNickname || !ui.regPassword) return;
+  saveRegisterDraft({
+    nickname: ui.regNickname.value.trim(),
+    password: ui.regPassword.value.trim(),
+  });
+};
 
-ui.resetMatch.addEventListener("click", () => {
-  resetScores();
-  resetPositions();
-  draw();
-  if (state.mode === "duel" && state.duelConnected && state.onlineRole === "host" && socket) {
-    socket.emit("match:reset", { code: state.roomCode });
-  }
-  showToast("РњР°С‚С‡ СЃР±СЂРѕС€РµРЅ");
-});
+if (ui.regNickname) {
+  ui.regNickname.addEventListener("input", updateRegisterDraft);
+}
 
-ui.playNow.addEventListener("click", () => {
-  showSection("arena");
-  state.playing = true;
-  ui.rinkOverlay.classList.add("hidden");
-});
+if (ui.regPassword) {
+  ui.regPassword.addEventListener("input", updateRegisterDraft);
+}
+if (ui.registerForm) {
+  ui.registerForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const nick = ui.regNickname.value.trim();
+    const password = ui.regPassword.value.trim();
+    if (!nick) {
+      ui.registerStatus.textContent = "Введите ник для регистрации.";
+      return;
+    }
+    if (!isValidPassword(password)) {
+      ui.registerStatus.textContent = "Пароль должен быть не короче 4 символов.";
+      return;
+    }
+    const user = { nickname: nick, password, elo: 0, games: 0 };
+    saveUser(user);
+    state.profile.nickname = user.nickname;
+    state.profile.elo = 0;
+    state.profile.games = 0;
+    saveProfile();
+    updateProfileUI();
+    ui.registerStatus.textContent = "Вы зарегистрировались. Теперь войдите.";
+    if (ui.registeredNick) {
+      ui.registeredNick.textContent = nick;
+    }
+    if (ui.loginNickname) {
+      ui.loginNickname.value = nick;
+    }
+    showToast("Вы зарегистрировались");
+    showSection("registered");
+  });
+}
 
-ui.openRegistrationTop.addEventListener("click", () => {
-  showSection("register");
-});
-
-ui.openArena.addEventListener("click", () => {
-  showSection("arena");
-});
-
-ui.profileBtn.addEventListener("click", openProfile);
-ui.closeProfile.addEventListener("click", closeProfile);
-ui.profileModal.addEventListener("click", (event) => {
-  if (event.target === ui.profileModal) closeProfile();
-});
-
-ui.registerForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const nick = ui.regNickname.value.trim();
-  const password = ui.regPassword.value.trim();
-  if (!nick) {
-    ui.registerStatus.textContent = "Введите ник для регистрации.";
-    return;
-  }
-  if (!isValidPassword(password)) {
-    ui.registerStatus.textContent = "Пароль должен быть не короче 4 символов.";
-    return;
-  }
-  if (!canUseStorage()) {
-    ui.registerStatus.textContent = "Браузер блокирует сохранение. Открой сайт не через file://.";
-    return;
-  }
-  const user = { nickname: nick, password, elo: 0, games: 0 };
-  saveUser(user);
-  state.profile.nickname = user.nickname;
-  state.profile.elo = 0;
-  state.profile.games = 0;
-  saveProfile();
-  updateProfileUI();
-  syncLeaderboard();
-  ui.registerStatus.textContent = "Вы зарегистрировались. Можно открыть профиль.";
-  showToast("Вы зарегистрировались");
-  openProfile();
-  showSection("login");
-});
-
-ui.loginForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const nick = ui.loginNickname.value.trim();
-  const password = ui.loginPassword.value.trim();
-  if (!nick || !password) {
-    ui.loginStatus.textContent = "Введите ник и пароль.";
-    return;
-  }
-  const storedUser = loadUser();
-  if (!storedUser || storedUser.nickname !== nick) {
-    ui.loginStatus.textContent = "Ник не найден. Сначала зарегистрируйся.";
-    return;
-  }
-  if (storedUser.password !== password) {
-    ui.loginStatus.textContent = "Неверный пароль.";
-    return;
-  }
-  state.profile.nickname = storedUser.nickname;
-  state.profile.elo = storedUser.elo ?? 0;
-  state.profile.games = storedUser.games ?? 0;
-  saveProfile();
-  updateProfileUI();
-  syncLeaderboard();
-  ui.loginStatus.textContent = "Вход выполнен. Удачной игры!";
-  showToast("Добро пожаловать");
-  showSection("home");
-});
-});
+if (ui.loginForm) {
+  ui.loginForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const nick = ui.loginNickname.value.trim();
+    const password = ui.loginPassword.value.trim();
+    if (!nick || !password) {
+      ui.loginStatus.textContent = "Введите ник и пароль.";
+      return;
+    }
+    const storedUser = loadUser();
+    if (!storedUser || storedUser.nickname !== nick) {
+      ui.loginStatus.textContent = "Ник не найден. Сначала зарегистрируйся.";
+      return;
+    }
+    if (storedUser.password !== password) {
+      ui.loginStatus.textContent = "Неверный пароль.";
+      return;
+    }
+    state.profile.nickname = storedUser.nickname;
+    state.profile.elo = storedUser.elo ?? 0;
+    state.profile.games = storedUser.games ?? 0;
+    state.authenticated = true;
+    saveProfile();
+    updateProfileUI();
+    ui.loginStatus.textContent = "Вход выполнен. Удачной игры!";
+    showToast("Добро пожаловать");
+    showSection("home");
+  });
+}
 
 const init = () => {
   loadProfile();
+  const draft = loadRegisterDraft();
+  if (ui.regNickname && draft.nickname) {
+    ui.regNickname.value = draft.nickname;
+  }
+  if (ui.regPassword && draft.password) {
+    ui.regPassword.value = draft.password;
+  }
   state.character = loadCharacter();
+  state.characterStats = loadCharacterStats();
   state.leftPaddle.radius = characters[state.character].radius;
   state.leftPaddle.hitRadius = characters[state.character].hitRadius;
   state.leftPaddle.hitBoost = characters[state.character].hitBoost;
@@ -819,12 +746,11 @@ const init = () => {
   updateProfileUI();
   updateHeroStatus();
   updateModeUI();
-  syncLeaderboard();
   updateRinkSize();
   resetScores();
-  initSocket();
   updatePaddleStyles();
-  showSection("register");
+  const storedUser = loadUser();
+  showSection(storedUser ? "login" : "register");
   window.addEventListener("resize", updateRinkSize);
   requestAnimationFrame((time) => {
     state.lastTime = time;
@@ -833,9 +759,6 @@ const init = () => {
 };
 
 init();
-
-
-
 
 
 

@@ -29,6 +29,10 @@
           <h2>Регистрация</h2>
           <p>У тебя 0 ЭЛО. Создай профиль — данные сохраняются в браузере.</p>
         </div>
+        <div class="auth-switch">
+          <span>Уже есть аккаунт?</span>
+          <button type="button" class="btn-outline btn-ghost" id="goLogin">Войти</button>
+        </div>
         <div class="auth-grid single">
           <form class="auth-card" id="registerForm" novalidate>
             <label class="field">
@@ -41,8 +45,28 @@
             </label>
             <button type="submit" class="btn-primary">Создать профиль</button>
             <div class="field-hint" id="registerStatus">После регистрации откроется вход.</div>
-            <button type="button" class="btn-outline" id="goLogin">Войти</button>
           </form>
+        </div>
+      </section>
+
+      <section class="auth flow-section" id="registered">
+        <div class="section-head">
+          <h2>Профиль создан</h2>
+          <p>Вы успешно зарегистрировались. Дальше нужен вход.</p>
+        </div>
+        <div class="auth-grid single">
+          <div class="success-card">
+            <div class="success-icon">✓</div>
+            <div class="success-text">
+              <strong>Готово!</strong>
+              <span>Ник: <b id="registeredNick">—</b></span>
+              <span>Теперь войди с паролем, чтобы открыть меню игры.</span>
+            </div>
+            <div class="success-actions">
+              <button class="btn-primary" id="registeredLogin">Войти</button>
+              <button class="btn-outline" id="registeredProfile">Профиль</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -50,6 +74,10 @@
         <div class="section-head">
           <h2>Вход</h2>
           <p>Если ты уже регистрировался — введи пароль.</p>
+        </div>
+        <div class="auth-switch">
+          <span>Нет аккаунта?</span>
+          <button type="button" class="btn-outline btn-ghost" id="goRegister">Регистрация</button>
         </div>
         <div class="auth-grid single">
           <form class="auth-card" id="loginForm" novalidate>
@@ -63,7 +91,6 @@
             </label>
             <button type="submit" class="btn-primary">Войти</button>
             <div class="field-hint" id="loginStatus">Введи пароль, чтобы войти.</div>
-            <button type="button" class="btn-outline" id="goRegister">Регистрация</button>
           </form>
         </div>
       </section>
