@@ -110,11 +110,15 @@ const showSection = (id) => {
     el.classList.toggle("is-active", key === id);
   });
   if (id === "arena") {
-    setTimeout(() => {
-      updateRinkSize();
-      resetPositions();
-      draw();
-    }, 50);
+    let tries = 0;
+    const tryResize = () => {
+      if (updateRinkSize()) return;
+      if (tries < 10) {
+        tries += 1;
+        requestAnimationFrame(tryResize);
+      }
+    };
+    requestAnimationFrame(tryResize);
   }
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
@@ -129,7 +133,7 @@ const characters = {
   kompot: {
     id: "kompot",
     label: "Компот",
-    speed: 520,
+    speed: 1200,
     radius: 30,
     hitRadius: 27,
     hitBoost: 55,
@@ -138,7 +142,7 @@ const characters = {
   karamelka: {
     id: "karamelka",
     label: "Карамелька",
-    speed: 1150,
+    speed: 3000,
     radius: 23,
     hitRadius: 23,
     hitBoost: 75,
@@ -147,7 +151,7 @@ const characters = {
   korzhik: {
     id: "korzhik",
     label: "Коржик",
-    speed: 850,
+    speed: 2300,
     radius: 23,
     hitRadius: 23,
     hitBoost: 90,
@@ -156,7 +160,7 @@ const characters = {
   gonya: {
     id: "gonya",
     label: "Гоня",
-    speed: 1000,
+    speed: 2000,
     radius: 23,
     hitRadius: 23,
     hitBoost: 60,
@@ -364,13 +368,16 @@ const resetScores = () => {
 
 const updateRinkSize = () => {
   const rect = ui.rink.getBoundingClientRect();
-  if (!rect.width || !rect.height) {
-    return;
+  const width = rect.width || ui.rink.offsetWidth;
+  const height = rect.height || ui.rink.offsetHeight;
+  if (!width || !height) {
+    return false;
   }
-  state.rink.width = rect.width;
-  state.rink.height = rect.height;
+  state.rink.width = width;
+  state.rink.height = height;
   resetPositions();
   draw();
+  return true;
 };
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
@@ -507,6 +514,15 @@ const updatePhysics = (delta) => {
 
   collide(state.leftPaddle, paddleRadiusLeft);
   collide(state.rightPaddle, paddleRadiusRight);
+
+  const friction = 0.35;
+  const damp = Math.max(0, 1 - friction * delta);
+  state.puck.vx *= damp;
+  state.puck.vy *= damp;
+  if (Math.hypot(state.puck.vx, state.puck.vy) < 8) {
+    state.puck.vx = 0;
+    state.puck.vy = 0;
+  }
 };
 
 const updateBot = (delta) => {
