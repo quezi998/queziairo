@@ -16,6 +16,9 @@ const ui = {
   profileGames: document.getElementById("profileGames"),
   profileFavorite: document.getElementById("profileFavorite"),
   heroStatus: document.getElementById("heroStatus"),
+  openCharacter: document.getElementById("openCharacter"),
+  characterDot: document.getElementById("characterDot"),
+  characterLabel: document.getElementById("characterLabel"),
   openShop: document.getElementById("openShop"),
   openPlay: document.getElementById("openPlay"),
   openProfile: document.getElementById("openProfile"),
@@ -264,6 +267,7 @@ const applyCharacter = (id) => {
     if (!card) return;
     btn.textContent = card.dataset.character === character.id ? "Выбран" : "Выбрать";
   });
+  updateSelectedCharacterUI();
 };
 
 const updatePaddleStyles = () => {
@@ -280,6 +284,16 @@ const updatePaddleStyles = () => {
     ui.paddleLeft.style.backgroundImage = `url(${character.image})`;
     ui.paddleLeft.style.backgroundSize = "cover";
     ui.paddleLeft.style.backgroundPosition = "center";
+  }
+};
+
+const updateSelectedCharacterUI = () => {
+  const character = characters[state.character] || characters.kompot;
+  if (ui.characterLabel) {
+    ui.characterLabel.textContent = `Персонаж: ${character.label}`;
+  }
+  if (ui.characterDot) {
+    ui.characterDot.style.backgroundImage = character.image ? `url(${character.image})` : "none";
   }
 };
 
@@ -601,6 +615,12 @@ if (ui.resetMatch) {
 
 if (ui.openShop) {
   ui.openShop.addEventListener("click", () => {
+    showSection("shop");
+  });
+}
+
+if (ui.openCharacter) {
+  ui.openCharacter.addEventListener("click", () => {
     showSection("shop");
   });
 }

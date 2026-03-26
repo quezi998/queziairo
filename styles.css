@@ -285,6 +285,34 @@ select {
   margin: 0 0 28px;
 }
 
+.selected-character {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.character-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.character-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #202020;
+  border: 1px solid #2a2a2a;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
+  background-size: cover;
+  background-position: center;
+}
+
 .menu-buttons {
   display: grid;
   grid-template-columns: minmax(180px, 220px) minmax(220px, 280px) minmax(180px, 220px);
