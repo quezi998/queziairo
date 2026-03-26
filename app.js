@@ -30,6 +30,11 @@ const ui = {
   matchStatus: document.getElementById("matchStatus"),
   rink: document.getElementById("rink"),
   rinkOverlay: document.getElementById("rinkOverlay"),
+  matchResult: document.getElementById("matchResult"),
+  matchTitle: document.getElementById("matchTitle"),
+  matchSub: document.getElementById("matchSub"),
+  playAgain: document.getElementById("playAgain"),
+  matchMenu: document.getElementById("matchMenu"),
   paddleLeft: document.getElementById("paddleLeft"),
   paddleRight: document.getElementById("paddleRight"),
   puck: document.getElementById("puck"),
@@ -76,6 +81,7 @@ const state = {
   botDifficulty: "normal",
   queue: false,
   authenticated: false,
+  draggingPuck: false,
   scores: { left: 0, right: 0 },
   playing: false,
   rink: { width: 0, height: 0 },
@@ -103,6 +109,13 @@ const showSection = (id) => {
     if (!el) return;
     el.classList.toggle("is-active", key === id);
   });
+  if (id === "arena") {
+    setTimeout(() => {
+      updateRinkSize();
+      resetPositions();
+      draw();
+    }, 50);
+  }
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
@@ -249,6 +262,25 @@ const showToast = (text) => {
   setTimeout(() => ui.goalToast.classList.remove("show"), goalToastDuration);
 };
 
+const showMatchResult = (title, sub) => {
+  if (ui.matchTitle) ui.matchTitle.textContent = title;
+  if (ui.matchSub) ui.matchSub.textContent = sub;
+  if (ui.matchResult) ui.matchResult.classList.remove("hidden");
+};
+
+const hideMatchResult = () => {
+  if (ui.matchResult) ui.matchResult.classList.add("hidden");
+};
+
+const startMatchFlow = () => {
+  state.playing = true;
+  state.matchLocked = false;
+  resetPositions();
+  draw();
+  hideMatchResult();
+  ui.rinkOverlay.classList.add("hidden");
+};
+
 const applyCharacter = (id) => {
   const character = characters[id] || characters.kompot;
   state.character = character.id;
@@ -332,6 +364,9 @@ const resetScores = () => {
 
 const updateRinkSize = () => {
   const rect = ui.rink.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    return;
+  }
   state.rink.width = rect.width;
   state.rink.height = rect.height;
   resetPositions();
@@ -339,6 +374,13 @@ const updateRinkSize = () => {
 };
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+const getPointerPosition = (event) => {
+  const rect = ui.rink.getBoundingClientRect();
+  const x = clamp(event.clientX - rect.left, 0, state.rink.width);
+  const y = clamp(event.clientY - rect.top, 0, state.rink.height);
+  return { x, y };
+};
 
 const setPaddlePosition = (paddle, x, y, leftSide) => {
   const radius = paddle.radius || 23;
@@ -378,27 +420,29 @@ const handleGoal = (scorer) => {
 
   if (matchOver) {
     state.matchLocked = true;
+    state.playing = false;
     if (state.scores.left > state.scores.right) {
       state.profile.elo += 200;
       state.profile.games += 1;
       saveProfile();
       updateProfileUI();
-      showToast("Победа! +200 ЭЛО");
+      const winnerName = state.profile.nickname || "Игрок";
+      showMatchResult(`Победа: ${winnerName}`, "+200 ЭЛО за победу");
     } else {
       state.profile.games += 1;
       saveProfile();
       updateProfileUI();
-      showToast("Матч завершён");
+      const title = state.mode === "bot" ? "Победа: Бот" : "Победа: Соперник";
+      showMatchResult(title, "Матч завершён");
     }
 
     state.characterStats[state.character] = (state.characterStats[state.character] || 0) + 1;
     saveCharacterStats();
     updateProfileUI();
 
-    resetScores();
-    setTimeout(() => {
-      state.matchLocked = false;
-    }, goalCooldownMs);
+    state.puck.vx = 0;
+    state.puck.vy = 0;
+    return;
   }
 
   const { width, height } = state.rink;
@@ -504,6 +548,7 @@ const updateIdleOpponent = (delta) => {
 const tick = (timestamp) => {
   if (!state.playing) {
     state.lastTime = timestamp;
+    draw();
     requestAnimationFrame(tick);
     return;
   }
@@ -542,12 +587,15 @@ const tick = (timestamp) => {
 };
 
 if (ui.rink) {
+  ui.rink.addEventListener("mousedown", (event) => {
+    if (!state.playing) return;
+    if (event.button !== 0) return;
+    state.controlTarget = getPointerPosition(event);
+  });
+
   ui.rink.addEventListener("mousemove", (event) => {
     if (!state.playing) return;
-    const rect = ui.rink.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    state.controlTarget = { x, y };
+    state.controlTarget = getPointerPosition(event);
   });
 }
 
@@ -600,8 +648,7 @@ if (ui.declineDuel) {
 
 if (ui.startMatch) {
   ui.startMatch.addEventListener("click", () => {
-    state.playing = true;
-    ui.rinkOverlay.classList.add("hidden");
+    startMatchFlow();
   });
 }
 
@@ -611,6 +658,7 @@ if (ui.resetMatch) {
     resetPositions();
     draw();
     showToast("Матч сброшен");
+    hideMatchResult();
   });
 }
 
@@ -640,6 +688,24 @@ if (ui.openProfile) {
 
 if (ui.backToMenuFromShop) {
   ui.backToMenuFromShop.addEventListener("click", () => {
+    showSection("home");
+  });
+}
+
+if (ui.playAgain) {
+  ui.playAgain.addEventListener("click", () => {
+    resetScores();
+    resetPositions();
+    draw();
+    startMatchFlow();
+  });
+}
+
+if (ui.matchMenu) {
+  ui.matchMenu.addEventListener("click", () => {
+    state.playing = false;
+    hideMatchResult();
+    ui.rinkOverlay.classList.remove("hidden");
     showSection("home");
   });
 }
@@ -776,6 +842,7 @@ const init = () => {
   updateRinkSize();
   resetScores();
   updatePaddleStyles();
+  updateSelectedCharacterUI();
   const storedUser = loadUser();
   showSection(storedUser ? "login" : "register");
   window.addEventListener("resize", updateRinkSize);
