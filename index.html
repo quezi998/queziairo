@@ -228,6 +228,12 @@
 
             <div class="panel-block hidden" id="onlineOptions">
               <h3>Подбор</h3>
+              <label class="field">
+                <span>Сервер (URL)</span>
+                <input type="text" id="serverUrl" placeholder="http://localhost:4000" />
+              </label>
+              <button class="btn-outline" id="connectServer">Подключить сервер</button>
+              <div class="field-hint" id="serverStatus">Сервер не подключен</div>
               <button class="btn-primary" id="queueToggle">Встать в очередь</button>
               <div class="queue-status" id="queueStatus">Очередь выключена</div>
             </div>
@@ -318,6 +324,7 @@
       </div>
     </div>
 
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
