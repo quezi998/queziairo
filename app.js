@@ -22,6 +22,7 @@ const ui = {
   openShop: document.getElementById("openShop"),
   openPlay: document.getElementById("openPlay"),
   openProfile: document.getElementById("openProfile"),
+  backToMenuFromShop: document.getElementById("backToMenuFromShop"),
   startMatch: document.getElementById("startMatch"),
   resetMatch: document.getElementById("resetMatch"),
   scoreLeft: document.getElementById("scoreLeft"),
@@ -634,6 +635,12 @@ if (ui.openPlay) {
 if (ui.openProfile) {
   ui.openProfile.addEventListener("click", () => {
     showSection("profile");
+  });
+}
+
+if (ui.backToMenuFromShop) {
+  ui.backToMenuFromShop.addEventListener("click", () => {
+    showSection("home");
   });
 }
 

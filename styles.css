@@ -354,6 +354,12 @@ select {
   padding: 24px;
 }
 
+.section-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 12px 0 16px;
+}
+
 .shop-grid {
   display: grid;
   gap: 12px;
